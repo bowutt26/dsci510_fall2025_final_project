@@ -13,5 +13,3 @@ RESULTS_DIR = "../results"
 aqs_epa_url = "https://aqs.epa.gov/data/api/annualData/byState"
 chronic_url = "https://data.cdc.gov/api/views/hksd-2xuw/rows.json?accessType=DOWNLOAD"
 who_url = "https://drive.google.com/file/d/1Biiamr8qiEv3IZi0o8E7O1ylMBfcuBJh/view?usp=share_link"
-
-

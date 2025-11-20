@@ -51,6 +51,7 @@ and discuss them in the context of global PM2.5 patterns.
 # Installation
 **for the Data Selection and Preparation part**
 - Get an API key for retrieving data from the EPA by using https://aqs.epa.gov/data/api/signup?email=myemail@example.com. You will receive the key in your email.
+- create .env file in /src
 - Set the registered email in the first line of the .env file using this template (aqs_epa_email=myemail@example.com)
 - Set the obtained key in the second line of the .env file using this template (aqs_epa_key=yourkey)
 

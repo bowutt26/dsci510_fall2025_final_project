@@ -75,13 +75,13 @@ def retrieve_file_pm25_who(who_url, extract_dir):
         pm25_who_path = os.path.join(extract_dir, "who_pm25.csv")
         with open(pm25_who_path, "wb") as f:
             f.write(r.content)
-        print(f"Worldwide PM2.5 concentration data saved to {pm25_who_path}")
+        print(f"Global PM2.5 concentration data saved to {pm25_who_path}")
 
         # Load the extracted CSV into a DataFrame
         if os.path.exists(pm25_who_path):
             print(f"Loading {pm25_who_path} into DataFrame...")
             pm25_who_data = pd.read_csv(pm25_who_path)
-            print("Worldwide PM2.5 concentration data loaded successfully\n")
+            print("Global PM2.5 concentration data loaded successfully\n")
         return pm25_who_data
 
     except Exception as e:
