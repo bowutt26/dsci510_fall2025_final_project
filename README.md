@@ -36,10 +36,10 @@ help contextualize how air pollution may relate to population health in the Unit
     - Data size: 4,725
 
 # Results
-I. Statistical Findings
+1. Statistical Findings
 - Significant Negative Link: Only Asthma (ρ=−0.51) and the Immunization control metric (ρ=−0.48) show a statistically significant relationship with PM2.5.
 - Biological Hypothesis Rejected: We found no significant correlation for COPD or Diabetes (P>0.05).
-II. Ecological Factors
+2. Ecological Factors
 - The negative correlation means that cleaner states have higher Asthma rates. This is driven by Ecological Confounding. 
 - The identical pattern in Immunization confirms a powerful third factor—likely Socioeconomic Status or strong public health policy—that influences both air quality and disease rates. 
 - For Asthma, factors like population migration (Avoidance Eﬀect) and local policy are stronger determinants than direct environmental exposure in this dataset.
@@ -60,10 +60,11 @@ II. Ecological Factors
     - python-dotenv
 
 # Running analysis
-1. Data preprocessing 
-   **Only five states are included as the study sample: California, Colorado, Illinois, New York, Texas.**
-   **Tools: requests - for API calls, json + pandas for parsing and structuring data**
-   **Tools: pandas - for filtering, cleaning, and handling missing data**
+1. Data preprocessing
+- Only five states are included as the study sample: California, Colorado, Illinois, New York, Texas.
+- Tools: requests - for API calls, json + pandas for parsing and structuring data
+- Tools: pandas - for filtering, cleaning, and handling missing data
+
     - U.S. PM2.5
       - Extract annual state-level PM2.5 data from the EPA API.
       - Filter for the 5 target states.
