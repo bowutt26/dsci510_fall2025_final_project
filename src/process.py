@@ -1,11 +1,11 @@
 import pandas as pd
 
-# Process PM2.5 concentration data and categorized into 5 states for 5 years
+# Process PM2.5 concentration data and categorized into 5 states for 8 years
 def process_pm25(pm25_data):
-    bdate = [20150101, 20160101, 20170101, 20180101, 20190101]
+    bdate = [20150101, 20160101, 20170101, 20180101, 20190101, 20200101, 20210101, 20220101]
     states = ["06", "08", "17", "36", "48"]
     state_names = {"06": "California", "08": "Colorado", "17": "Illinois", "36": "New York", "48": "Texas"}
-    pm25_5states_5years = {}
+    pm25_5states_8years = {}
 
     print(f"Processing U.S. PM2.5 data...")
 
@@ -20,73 +20,82 @@ def process_pm25(pm25_data):
             annual_means = [result["arithmetic_mean"] for result in results]  # Select only the arithmetic mean value from each county
             annual_means_5states[state_names[states[index_state]]] = annual_means
             data_len += len(annual_means)
-        pm25_5states_5years[bdate[index_year]] = annual_means_5states  # Collecting data over 5 years
+        pm25_5states_8years[bdate[index_year]] = annual_means_5states  # Collecting data over 5 years
         print(f"    Data length: Year {bdate[index_year]} - PM2.5 concentration = {data_len}")
     print("U.S. PM2.5 concentration data processed successfully\n")
-    return pm25_5states_5years
+    return pm25_5states_8years
 
-# Process chronic disease data and categorized into 5 states for 5 years
+# Process chronic disease data and categorized into 5 states for 8 years
 def process_chronic(chronic_data):
-    valid_units = {"%", "cases per 1,000", "cases per 100,000", "cases per 1,000,000", "per 100,000"}
-    targeted_states = {"California", "Colorado", "Illinois", "New York", "Texas"}
-    chronic_5state_5years = []
+    # Filter criteria
+    TARGET_DATA_TYPE = "Age-adjusted Prevalence"
+    TARGET_STRATIFICATION_1 = "Overall"
+    TARGET_STATES = ["California", "Colorado", "Illinois", "New York", "Texas"]
+
+    # Define columns based on the data structure
+    YEAR_INDEX = 8 # "YearStart"
+    STATE_INDEX = 11 # "LocationDesc"
+    DISEASE_INDEX = 13 # "Topic"
+    DATA_UNIT_INDEX = 16 # "DataValueUnit"
+    DATA_TYPE_INDEX = 17 # "DataValueType"
+    DATA_VALUE_INDEX = 18 # "DataValue"
+    STRATIFICATION_1_INDEX = 25 # "Stratification1"
+
+    # df_chronic_raw = None
+    chronic_5state_8years = []
 
     print("Processing U.S. chronic disease data...")
 
-    # Define indices based on the data structure
-    YEAR_INDEX = 8
-    LOCATION_INDEX = 11
-    TOPIC_INDEX = 13
-    UNIT_INDEX = 16
-    VALUE_INDEX = 18
-
     data_rows = chronic_data.get("data", [])[1:]
     for row in data_rows:
-        # Ensure the row is long enough to prevent IndexError
-        if len(row) < VALUE_INDEX + 1:
-            continue
-
         # Check raw value for None before attempting any conversion
-        raw_value = row[VALUE_INDEX]
+        raw_value = row[DATA_VALUE_INDEX]
         if raw_value is None:
             continue
 
         # Attempt to extract and clean all necessary fields
         try:
             year = int(row[YEAR_INDEX])
-            unit = str(row[UNIT_INDEX]).strip()
-            state = str(row[LOCATION_INDEX]).strip()
-            disease = str(row[TOPIC_INDEX]).strip()
+            unit = str(row[DATA_UNIT_INDEX]).strip()
+            unit_type = str(row[DATA_TYPE_INDEX]).strip()
+            state = str(row[STATE_INDEX]).strip()
+            stratification = str(row[STRATIFICATION_1_INDEX]).strip()
+            disease = str(row[DISEASE_INDEX]).strip()
             value = float(raw_value)  # Convert to float to ensure it's not None
 
         except (IndexError, ValueError):
-            # Catches errors if the index is incorrect
-            # or if a value cannot be converted
+            # Catches errors if the index is incorrect or if a value cannot be converted
             continue
 
-        # Check if the record uses a valid standardized unit
-        if unit not in valid_units:
+        # Filter by year range (2015 - 2022)
+        if not (2015 <= year <= 2022):
             continue
 
-        # Filter by year range (2015 - 2019)
-        if not (2015 <= year <= 2019):
+        # Filter by target data value type
+        if unit_type != TARGET_DATA_TYPE:
             continue
 
         # Filter by targeted states
-        if state not in targeted_states:
+        if state not in TARGET_STATES:
+            continue
+
+        # Filter by target stratification
+        if stratification not in TARGET_STRATIFICATION_1:
             continue
 
         # Append Cleaned Record ---
-        chronic_5state_5years.append({
+        chronic_5state_8years.append({
             "year": year,
-            "state": state,
-            "disease": disease,
             "unit": unit,
+            "unit_type": unit_type,
+            "state": state,
+            "stratification": stratification,
+            "disease": disease,
             "value": value
         })
-    print(f"    Cleaned data length: U.S. chronic disease (5 states, 5 years) = {len(chronic_5state_5years)}")
+    print(f"    Cleaned data length: U.S. chronic disease age-adjusted prevalence rate (5 states, 8 years) = {len(chronic_5state_8years)}")
     print("Chronic disease data processed successfully.\n")
-    return chronic_5state_5years
+    return chronic_5state_8years
 
 # Process PM2.5 concentration worldwide data and categorized for 5 years
 def process_pm25_who(pm25_who_data):
@@ -119,12 +128,12 @@ def process_pm25_who(pm25_who_data):
     print("Global PM2.5 data processed successfully\n")
     return pm25_who_5years
 
-def aggregate_us_pm25(pm25_dict):
+def aggregate_us_pm25(pm25_5states_8years):
     # Aggregates the county-level PM2.5 means (from process_pm25 output) to a single State-Year average.
     aggregated_data = []
 
     # pm25_dict keys are date strings (e.g., 20150101) after conversion in process_pm25
-    for date_key, state_data in pm25_dict.items():
+    for date_key, state_data in pm25_5states_8years.items():
         # Convert the date_key (e.g., 20150101) to a simple year integer (e.g., 2015)
         year = int(str(date_key)[:4])
 
@@ -143,17 +152,15 @@ def aggregate_us_pm25(pm25_dict):
     print(f"U.S. PM2.5 aggregated to {len(df_pm25_agg)} State-Year rows.")
     return df_pm25_agg
 
-def aggregate_us_chronic(chronic_list):
+def aggregate_us_chronic(chronic_5state_8years):
     # Aggregates the cleaned chronic disease records (from process_chronic output) to a single State-Year average value.
-    df_chronic = pd.DataFrame(chronic_list)
+    df_chronic = pd.DataFrame(chronic_5state_8years)
 
     # Calculate the mean 'value' for each combination of 'state' and 'year'
     df_chronic_agg = df_chronic.groupby(["state", "year", "disease", "unit"])["value"].mean().reset_index()
 
     # Rename the aggregated column for clarity
-    df_chronic_agg = df_chronic_agg.rename(
-        columns={"value": "avg_prevalence_rate"}
-    )
+    df_chronic_agg = df_chronic_agg.rename(columns={"value": "avg_prevalence_rate"})
 
     # Drop records where the disease or unit is NaN after grouping (shouldn't happen with clean data)
     df_chronic_agg = df_chronic_agg.dropna(subset=['disease'])
@@ -164,10 +171,10 @@ def aggregate_us_chronic(chronic_list):
 def merge_us_data(df_pm25_agg, df_chronic_agg):
     # Merges the aggregated U.S. PM2.5 and chronic disease data on 'state' and 'year'
     df_merged = pd.merge(
-        df_pm25_agg,
         df_chronic_agg,
+        df_pm25_agg,
         on=["state", "year"],
-        how="inner"  # Use inner to only keep state-year pairs present in both datasets
+        how="outer"  # Use outer to keep entire state-year pairs present in both datasets
     )
-    print(f"U.S. Data Merged. Resulting DataFrame has {len(df_merged)} rows (multiple per state-year).")
+    print(f"U.S. Data Merged (Outer join). Resulting DataFrame has {len(df_merged)} rows.")
     return df_merged

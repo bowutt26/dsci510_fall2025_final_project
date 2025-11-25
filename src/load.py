@@ -3,17 +3,15 @@ import requests
 import re
 import ssl
 import pandas as pd
-import json
-import csv
 
 def retrieve_file_pm25(aqs_epa_url):
     aqs_epa_email = os.getenv("aqs_epa_email")
     aqs_epa_key = os.getenv("aqs_epa_key")
-    bdate = [20150101, 20160101, 20170101, 20180101, 20190101]
-    edate = [20151231, 20161231, 20171231, 20181231, 20191231]
+    bdate = [20150101, 20160101, 20170101, 20180101, 20190101, 20200101, 20210101, 20220101]
+    edate = [20151231, 20161231, 20171231, 20181231, 20191231, 20201231, 20211231, 20221231]
     states = ["06", "08", "17", "36", "48"]
     state_names = {"06": "California", "08": "Colorado", "17": "Illinois", "36": "New York", "48": "Texas"}
-    pm25_conc_5years = {}
+    pm25_conc_8years = {}
 
     print(f"Loading data from {aqs_epa_url}...")
 
@@ -41,9 +39,9 @@ def retrieve_file_pm25(aqs_epa_url):
                 continue
 
             pm25_conc_data[state_names[states[index_state]]] = pm25_concentration
-        pm25_conc_5years[bdate[index_year]] = pm25_conc_data
+        pm25_conc_8years[bdate[index_year]] = pm25_conc_data
     print("U.S. PM2.5 concentration data loaded successfully\n")
-    return pm25_conc_5years
+    return pm25_conc_8years
 
 def retrieve_file_chronic(chronic_url):
     print(f"Loading data from {chronic_url}...")
